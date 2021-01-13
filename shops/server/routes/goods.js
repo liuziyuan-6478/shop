@@ -8,7 +8,15 @@ mongoose.connect('mongodb://localhost/playground', { useNewUrlParser: true, useU
   .catch(err => { console.log(err, '连接失败'); })
 
 router.get('/', (req, res, next) => {
-  Goods.find({}, (err, doc) => {
+  //分页
+  let page = parseInt(req.param('page'))
+  let pageSize = parseInt(req.param('pageSize'))
+  let sort = req.param('sort')
+  let skip = (page - 1) * pageSize
+  let params = {}
+  let goodsModel = Goods.find(params).skip(skip).limit(pageSize)
+  goodsModel.sort({ 'salePrice': sort })
+  goodsModel.exec({}, (err, doc) => {
     if (err) {
       res.json({
         status: '1',
