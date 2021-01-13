@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+</head>
+
+<body>
+  <script>
+    let checkLogin = function () {
+      return new Promise(function (res, rej) {
+        let flag = document.cookie.indexOf('userid') > -1 ? true : false;
+        if (flag = true) {
+          res({
+            status: 0,
+            result: true
+          })
+        } else {
+          rej('error')
+        }
+      })
+    }
+    let getUserInfo = () => {
+      return new Promise((res, rej) => {
+        let userInfo = {
+          userId: '101'
+        }
+        res(userInfo)
+      })
+    }
+    checkLogin().then((res) => {
+      if (res.status == 0) {
+        console.log("success");
+        return getUserInfo()
+      }
+    }).catch(error => {
+      console.log(`error:${error}`);
+    }).then(res2 => {
+      console.log(`userid:${res2.userId}`);
+    })
+
+    Promise.all([checkLogin(), getUserInfo()]).then(([res1, res2]) => {
+      console.log(`result1:${res1.result}`, `result2:${res2.userId}`);
+    })
+  </script>
+</body>
+
+</html>
