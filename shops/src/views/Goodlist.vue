@@ -74,7 +74,7 @@
                 infinite-scroll-disabled="busy"
                 infinite-scroll-distance="30"
               >
-                加载中...
+                <img src="./../assets/loading-spinning-bubbles.svg" v-show="loading" alt="" />
               </div>
             </div>
           </div>
@@ -101,7 +101,7 @@ export default {
       sortFlag: true, //升序
       page: 1,
       pageSize: 8,
-      busy: true,
+      busy: true, // 滚动不生效
       priceFilter: [
         {
           startPrice: "0.00",
@@ -119,6 +119,7 @@ export default {
       priceChecked: "all", //价格区间
       filterBy: false, //价格区间开关
       overLayFlag: false, //遮罩层
+      loading: false,
     };
   },
   components: {
@@ -137,10 +138,13 @@ export default {
       let param = {
         page: this.page,
         pageSize: this.pageSize,
-        sort: this.sortFlag ? 1 : -1,
+        sort: this.sortFlag ? 1 : -1, //true升序 false降序
+        priceLevel: this.priceChecked,
       };
+      this.loading = true
       axios.get("/goods", { params: param }).then((result) => {
         let res = result.data;
+        this.loading = false
         if (res.status == "0") {
           if (flag) {
             this.goodsList = this.goodsList.concat(res.result.list);
@@ -178,6 +182,8 @@ export default {
     setPriceFilter(index) {
       this.priceChecked = index;
       this.closePop();
+      this.page = 1;
+      this.getGoodsList();
     },
     /**
      * 商品升降序
@@ -187,7 +193,9 @@ export default {
       this.page = 1;
       this.getGoodsList();
     },
-
+    /**
+     * 鼠标滚动后加载
+     */
     loadMore() {
       this.busy = true;
       setTimeout(() => {
