@@ -105,6 +105,10 @@ export default {
       priceFilter: [
         {
           startPrice: "0.00",
+          endPrice: "100.00",
+        },
+        {
+          startPrice: "100.00",
           endPrice: "500.00",
         },
         {
