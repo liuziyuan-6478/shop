@@ -69,7 +69,7 @@
                 </li>
               </ul>
               <div
-              class="load-more"
+                class="load-more"
                 v-infinite-scroll="loadMore"
                 infinite-scroll-disabled="busy"
                 infinite-scroll-distance="30"
@@ -98,7 +98,7 @@ export default {
   data() {
     return {
       goodsList: [],
-      sortFlag: true,
+      sortFlag: true, //升序
       page: 1,
       pageSize: 8,
       busy: true,
@@ -116,9 +116,9 @@ export default {
           endPrice: "2000.00",
         },
       ],
-      priceChecked: "all",
-      filterBy: false,
-      overLayFlag: false,
+      priceChecked: "all", //价格区间
+      filterBy: false, //价格区间开关
+      overLayFlag: false, //遮罩层
     };
   },
   components: {
@@ -130,52 +130,64 @@ export default {
     this.getGoodsList();
   },
   methods: {
+    /**
+     * 获取商品列表
+     */
     getGoodsList(flag) {
       let param = {
         page: this.page,
         pageSize: this.pageSize,
         sort: this.sortFlag ? 1 : -1,
       };
-      axios
-        .get("/goods", {
-          params: param,
-        })
-        .then((result) => {
-          let res = result.data;
-          if (res.status == "0") {
-            if (flag) {
-              this.goodsList = this.goodsList.concat(res.result.list);
-              if (res.result.count == 0) {
-                this.busy = true;
-              } else {
-                this.busy = false;
-              }
+      axios.get("/goods", { params: param }).then((result) => {
+        let res = result.data;
+        if (res.status == "0") {
+          if (flag) {
+            this.goodsList = this.goodsList.concat(res.result.list);
+            if (res.result.count == 0) {
+              this.busy = true;
             } else {
-              this.goodsList = res.result.list;
               this.busy = false;
             }
           } else {
-            this.goodsList = [];
+            this.goodsList = res.result.list;
+            this.busy = false;
           }
-        });
+        } else {
+          this.goodsList = [];
+        }
+      });
     },
+    /**
+     * 屏幕缩放下，展示筛选依据
+     */
     showFilterPop() {
       this.filterBy = true;
       this.overLayFlag = true;
     },
+    /**
+     * 屏幕缩放下，点击遮罩层，关闭筛选依据
+     */
     closePop() {
       this.filterBy = false;
       this.overLayFlag = false;
     },
+    /**
+     * 选择价格区间
+     */
     setPriceFilter(index) {
       this.priceChecked = index;
       this.closePop();
     },
+    /**
+     * 商品升降序
+     */
     sortGoods() {
       this.sortFlag = !this.sortFlag;
       this.page = 1;
       this.getGoodsList();
     },
+
     loadMore() {
       this.busy = true;
       setTimeout(() => {

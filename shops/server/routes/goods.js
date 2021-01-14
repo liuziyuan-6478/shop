@@ -8,7 +8,6 @@ mongoose.connect('mongodb://localhost/playground', { useNewUrlParser: true, useU
   .catch(err => { console.log(err, '连接失败'); })
 
 router.get('/', (req, res, next) => {
-  //分页
   let page = parseInt(req.param('page'))
   let pageSize = parseInt(req.param('pageSize'))
   let sort = req.param('sort')
