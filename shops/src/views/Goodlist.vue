@@ -9,7 +9,7 @@
         <div class="filter-nav">
           <span class="sortby">Sort by:</span>
           <a href="javascript:void(0)" class="default cur">Default</a>
-          <a href="javascript:void(0)" class="price"
+          <a href="javascript:void(0)" class="price" @click="sortGoods"
             >Price
             <svg class="icon icon-arrow-short">
               <use xlink:href="#icon-arrow-short"></use></svg
@@ -61,49 +61,21 @@
                   </div>
                   <div class="main">
                     <div class="name">{{ item.productName }}</div>
-                    <div class="price">{{ item.productPrice }}</div>
-                    <div class="btn-area">
-                      <a href="javascript:;" class="btn btn--m">加入购物车</a>
-                    </div>
-                  </div>
-                </li>
-                <li>
-                  <div class="pic">
-                    <a href="#"><img src="static/2.jpg" alt="" /></a>
-                  </div>
-                  <div class="main">
-                    <div class="name">XX</div>
-                    <div class="price">1000</div>
-                    <div class="btn-area">
-                      <a href="javascript:;" class="btn btn--m">加入购物车</a>
-                    </div>
-                  </div>
-                </li>
-                <li>
-                  <div class="pic">
-                    <a href="#"><img src="static/3.jpg" alt="" /></a>
-                  </div>
-                  <div class="main">
-                    <div class="name">XX</div>
-                    <div class="price">500</div>
-                    <div class="btn-area">
-                      <a href="javascript:;" class="btn btn--m">加入购物车</a>
-                    </div>
-                  </div>
-                </li>
-                <li>
-                  <div class="pic">
-                    <a href="#"><img src="static/4.jpg" alt="" /></a>
-                  </div>
-                  <div class="main">
-                    <div class="name">XX</div>
-                    <div class="price">2499</div>
+                    <div class="price">{{ item.salePrice }}</div>
                     <div class="btn-area">
                       <a href="javascript:;" class="btn btn--m">加入购物车</a>
                     </div>
                   </div>
                 </li>
               </ul>
+              <div
+              class="load-more"
+                v-infinite-scroll="loadMore"
+                infinite-scroll-disabled="busy"
+                infinite-scroll-distance="30"
+              >
+                加载中...
+              </div>
             </div>
           </div>
         </div>
@@ -126,6 +98,10 @@ export default {
   data() {
     return {
       goodsList: [],
+      sortFlag: true,
+      page: 1,
+      pageSize: 8,
+      busy: true,
       priceFilter: [
         {
           startPrice: "0.00",
@@ -154,15 +130,34 @@ export default {
     this.getGoodsList();
   },
   methods: {
-    getGoodsList() {
-      axios.get("/goods").then((result) => {
-        var res = result.data;
-        if (res.status == "0") {
-          this.goodsList = res.result.list;
-        } else {
-          this.goodsList = [];
-        }
-      });
+    getGoodsList(flag) {
+      let param = {
+        page: this.page,
+        pageSize: this.pageSize,
+        sort: this.sortFlag ? 1 : -1,
+      };
+      axios
+        .get("/goods", {
+          params: param,
+        })
+        .then((result) => {
+          let res = result.data;
+          if (res.status == "0") {
+            if (flag) {
+              this.goodsList = this.goodsList.concat(res.result.list);
+              if (res.result.count == 0) {
+                this.busy = true;
+              } else {
+                this.busy = false;
+              }
+            } else {
+              this.goodsList = res.result.list;
+              this.busy = false;
+            }
+          } else {
+            this.goodsList = [];
+          }
+        });
     },
     showFilterPop() {
       this.filterBy = true;
@@ -175,6 +170,18 @@ export default {
     setPriceFilter(index) {
       this.priceChecked = index;
       this.closePop();
+    },
+    sortGoods() {
+      this.sortFlag = !this.sortFlag;
+      this.page = 1;
+      this.getGoodsList();
+    },
+    loadMore() {
+      this.busy = true;
+      setTimeout(() => {
+        this.page++;
+        this.getGoodsList(true);
+      }, 500);
     },
   },
 };
